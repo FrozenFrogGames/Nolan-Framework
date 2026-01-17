@@ -10,6 +10,7 @@ I Love King Quest
 Merci mon valeureux ...</>et bonne chance!
 ++ (?hero.sword)-[?king]->() #WORRY
 Restez prudent avec ça.|Ça a déjà coupé des têtes!
+++ (hero)-[sword]->(hero.sword)
 ++ ()-{sword}[hero]->(hero.sword)
 ++ (?hero;!sword)-[?king]->() #TALK
 Accepterez-vous ma quête preu chevalier?
@@ -23,8 +24,8 @@ Accepterez-vous ma quête preu chevalier?
 ---- Non[!], je suis contre la cruauté animale.
 -- Non[!], merci.
 ++ (dragon<CAVE>)-{hero.sword}[?door<CAVE>]->(dragon.kill<CAVE>;hero.sword<CAVE>) #HAPPY
-Tous les gens du royame vécurent heureux et eurent beaucoup d'enfants.
+Tous les gens du royame vécurent heureux et eurent beaucoup d'enfants.<$EOF/>
 ++ (hero)-{sword}[king]->(hero.sword;king.kill) #TYRAN
-Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.
+Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.<$EOF/>
 ++ (?king)-{hero.sword}[?castle<HOME>]->(hero.sword<HOME>)
 ++ ()-{hero.sword}[king]->(hero.sword;king.kill) #TYRAN

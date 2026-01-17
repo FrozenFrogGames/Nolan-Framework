@@ -175,7 +175,14 @@ namespace FrozenFrogFramework.NolanApp
                                         {
                                             for (int i = rangeText.Start.Value; i < rangeText.End.Value; i++)
                                             {
-                                                Console.WriteLine(script.TextBook[$"{text.Substring(0, lineEnds)}_{i}"]);
+                                                string result = script.TextBook[$"{text.Substring(0, lineEnds)}_{i}"];
+
+                                                if (result.Equals("<$EOF/>"))
+                                                {
+                                                    return;
+                                                }
+
+                                                Console.WriteLine(result);
                                             }
                                         }
                                     }
