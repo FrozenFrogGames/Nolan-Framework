@@ -122,7 +122,14 @@ namespace FrozenFrogFramework.NolanApp
 
                                         foreach (var payload in route.Flow.ElementAt(inputIndex).Payload)
                                         {
+                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AssertNoTag, payload.Value, string.IsNullOrEmpty(payload.Location) ? scene : payload.Location));
                                             routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payload.Value, string.IsNullOrEmpty(payload.Location) ? scene : payload.Location));
+                                        }
+
+                                        foreach (var payload in route.Flow.ElementAt(inputIndex).Gain)
+                                        {
+                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AssertNoTag, payload.Value, "DRAG"));
+                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payload.Value, "DRAG"));
                                         }
 
                                         transient = transient.Apply(routeMeta.ToArray(), ref scene);

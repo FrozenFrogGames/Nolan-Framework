@@ -13,6 +13,7 @@ Accepterez-vous ma quête preu chevalier?
 -- [Peut-être?] Ça dépend, c'est quoi?
 --- Libérez le royaume du dragon.|Tuez la bête.
 ---- Oui[.] mais j'ai besoin d'une arme.
+----- Prenez l'épée royale mon brave.
 ----> (sword) THANK
 ---- Non[!], je suis contre la cruauté animale.
 -- Non[!], merci.
