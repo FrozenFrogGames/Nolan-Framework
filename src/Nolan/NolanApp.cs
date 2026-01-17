@@ -36,11 +36,39 @@ namespace FrozenFrogFramework.NolanApp
 
                         Console.WriteLine($"File: {contentOutput}");
                     }
+
+
+                    writeGameplayTags( contentFilename, F3NolanGameTag.GameTags);
                 }
             }
             else
             {
                 Console.WriteLine($"Error (file not found): {contentFilename}");
+            }
+        }
+
+        private void writeGameplayTags(string contentFilename, List<string> gameTags)
+        {
+            string filename = Path.GetFileNameWithoutExtension(contentFilename);
+            string directory = Path.GetDirectoryName( Path.Combine(Directory.GetCurrentDirectory(), contentFilename) ) ?? Directory.GetCurrentDirectory();
+
+            gameTags.Sort(StringComparer.OrdinalIgnoreCase);
+
+            using (StreamWriter headerWriter = new StreamWriter(Path.Combine(directory, filename + "_GameTags.h")))
+            {
+                using (StreamWriter bodyWriter = new StreamWriter(Path.Combine(directory, filename + "_GameTags.cpp")))
+                {
+                    headerWriter.WriteLine(@"#pragma once" + System.Environment.NewLine + System.Environment.NewLine + "#include \"NativeGameplayTags.h\"" + System.Environment.NewLine);
+                    bodyWriter.WriteLine($"#include \"{filename}_GameTags.h\"" + System.Environment.NewLine);
+
+                    foreach (string statTag in gameTags)
+                    {
+                        string tagName = string.Format($"TAG_{statTag.Replace(".", "_")}");
+
+                        headerWriter.WriteLine($"UE_DECLARE_GAMEPLAY_TAG_EXTERN({tagName})");
+                        bodyWriter.WriteLine($"UE_DEFINE_GAMEPLAY_TAG({tagName}, \"{statTag}\")");
+                    }
+                }
             }
         }
 
@@ -66,7 +94,7 @@ namespace FrozenFrogFramework.NolanApp
 
                     foreach (var option in options)
                     {
-                        Console.WriteLine($"[{index++}] {option.Key}");
+                        Console.WriteLine($"[{index++}] {option.Key.Substring(3)}");
                     }
 
                     Console.Write("Choose an option: ");
@@ -91,14 +119,14 @@ namespace FrozenFrogFramework.NolanApp
                                 {
                                     if (string.IsNullOrWhiteSpace(text) == false)
                                     {
-                                        if (text.EndsWith('%'))
+                                        string result = text.EndsWith('%') ? script.TextBook[text.Substring(0, text.Length - 1)] : script.TextBook[text];
+
+                                        if (result.Equals("<$EOF/>")) // TODO handle signal better
                                         {
-                                            Console.WriteLine(script.TextBook[text.Substring(0, text.Length - 1)]);
+                                            return;
                                         }
-                                        else
-                                        {
-                                            Console.WriteLine(script.TextBook[text]);
-                                        }
+
+                                        Console.WriteLine(result);
                                     }
                                 }
 
@@ -155,41 +183,52 @@ namespace FrozenFrogFramework.NolanApp
                         {
                             if (string.IsNullOrWhiteSpace(text) == false)
                             {
-                                if (script.TextBook.Ranges.TryGetValue(text, out var range))
+                                int lineIndex, lineEnds = text.LastIndexOf('_');
+                                
+                                if (lineEnds < 1)
                                 {
-                                    int lineIndex, lineEnds = text.LastIndexOf('_');
-                                    
-                                    if (lineEnds < 1)
-                                    {
-                                        lineEnds = text.Length;
-                                        lineIndex = 0;                                        
-                                    }
-                                    else
-                                    {
-                                        lineIndex = int.Parse(text.Substring(lineEnds + 1));
-                                    }
+                                    lineEnds = text.Length;
+                                    lineIndex = 0;                                        
+                                }
+                                else
+                                {
+                                    lineIndex = int.Parse(text.Substring(lineEnds + 1));
+                                }
 
+                                string textKey = text.Substring(0, lineEnds);
+
+                                if (script.TextBook.Ranges.TryGetValue(textKey, out var range))
+                                {
                                     foreach(var rangeText in range)
                                     {
                                         if (lineIndex == rangeText.Start.Value)
                                         {
                                             for (int i = rangeText.Start.Value; i < rangeText.End.Value; i++)
                                             {
-                                                string result = script.TextBook[$"{text.Substring(0, lineEnds)}_{i}"];
+                                                string result = script.TextBook[$"{textKey}_{i}"];
 
-                                                if (result.Equals("<$EOF/>"))
+                                                if (result.Equals("<$EOF/>")) // TODO handle signal better
                                                 {
                                                     return;
                                                 }
 
                                                 Console.WriteLine(result);
                                             }
+
+                                            break;
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine(script.TextBook[text]);
+                                    string result = script.TextBook[text];
+
+                                    if (result.Equals("<$EOF/>")) // TODO handle signal better
+                                    {
+                                        return;
+                                    }
+
+                                    Console.WriteLine(result);
                                 }
                             }
                         }

@@ -1,17 +1,15 @@
-== KINGQUEST [CAVE, castle;dragon] [HOME, door;hero;king]
+== BOF [CAVE, castle;dragon] [HOME, door;hero;king]
+++ ()-[?door<CAVE>]->()
+++ ()-[?castle<HOME>]->()
 ++ ()-[?hero]->() #HELLO
 Hello World
-++ ()-[?hero.sword]->() #QUEST
-I Love King Quest
-++ ()-[?door<CAVE>]->()
-++ (dragon<CAVE>)-{hero}[?door<CAVE>]->(dragon.fire<CAVE>;hero.kill<CAVE>)
-++ ()-[?castle<HOME>]->()
-++ (?sword)-[?king]->() #THANK
-Merci mon valeureux ...</>et bonne chance!
-++ (?hero.sword)-[?king]->() #WORRY
-Restez prudent avec ça.|Ça a déjà coupé des têtes!
+++ (dragon<CAVE>)-{hero}[?door<CAVE>]->(dragon.fire<CAVE>;hero.kill<CAVE>) #GAMEOVER
+<$EOF/>
 ++ (hero)-[sword]->(hero.sword)
 ++ ()-{sword}[hero]->(hero.sword)
+++ (?king)-{hero.sword}[?castle<HOME>]->(hero.sword<HOME>)
+++ ()-[?hero.sword]->() #QUEST
+I Love King Quest
 ++ (?hero;!sword)-[?king]->() #TALK
 Accepterez-vous ma quête preu chevalier?
 -- Oui[.] votre majesté.
@@ -23,9 +21,12 @@ Accepterez-vous ma quête preu chevalier?
 ----> (sword) THANK
 ---- Non[!], je suis contre la cruauté animale.
 -- Non[!], merci.
+++ (?sword)-[?king]->() #THANK
+Merci mon valeureux ...</>et bonne chance!
 ++ (dragon<CAVE>)-{hero.sword}[?door<CAVE>]->(dragon.kill<CAVE>;hero.sword<CAVE>) #HAPPY
 Tous les gens du royame vécurent heureux et eurent beaucoup d'enfants.<$EOF/>
+++ (?hero.sword)-[?king]->() #WORRY
+Restez prudent avec ça.|Ça a déjà coupé des têtes!
 ++ (hero)-{sword}[king]->(hero.sword;king.kill) #TYRAN
 Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.<$EOF/>
-++ (?king)-{hero.sword}[?castle<HOME>]->(hero.sword<HOME>)
 ++ ()-{hero.sword}[king]->(hero.sword;king.kill) #TYRAN

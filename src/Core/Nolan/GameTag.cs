@@ -138,7 +138,14 @@ namespace FrozenFrogFramework.NolanTech
 
                 Meter = new MeterRange(rangeStart, rangeEnd);
             }
+
+            if (GameTags.Contains(Value) == false)
+            {
+                GameTags.Add(Value);
+            }
         }
+
+        public static List<string> GameTags { get; private set; } = new List<string>();
 
         private static string ExtractNumberStep(string Tag, int Delimiter, out short Value)
         {
