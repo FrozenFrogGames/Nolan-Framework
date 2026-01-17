@@ -125,6 +125,22 @@ namespace FrozenFrogFramework.NolanTech
                 }
             }
 
+            if (routeStart > -1 && routeEnd > routeStart)
+            {
+                int routeLabel = -1;
+
+                for (int j = routeStart; j > 0; --j)
+                {
+                    if (lines[j - 1].Delimiter == '+')
+                    {
+                        routeLabel = j - 1;
+                        break;
+                    }
+                }
+
+                BuildRoute(lines, routeLabel, routeStart, routeEnd, ref parts);
+            }
+
             BuildTape(lines, ref parts);
         }
 
