@@ -34,7 +34,10 @@ namespace FrozenFrogFramework.NolanTech
             {
                 nameIndex = i % names.Count;
 
-                textKeys[names[nameIndex]].AddRange(add(names[nameIndex], lines[i]));
+                if (string.IsNullOrWhiteSpace(lines[i]) == false)
+                {
+                    textKeys[names[nameIndex]].AddRange(add(names[nameIndex], lines[i]));
+                }
             }
         }
 
