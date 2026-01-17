@@ -44,7 +44,7 @@ namespace FrozenFrogFramework.NolanApp
             }
         }
 
-        public void play(string filename)
+        public void play(string filename, string? location = null)
         {
             F3NolanScriptData script;
             int index, inputIndex;
@@ -53,7 +53,7 @@ namespace FrozenFrogFramework.NolanApp
             if (load(filename, out script))
             {
                 Console.Clear();
-                string scene = "HOME";
+                string scene = string.IsNullOrEmpty(location) ? script.InitialStat.FirstOrDefault().Key : location;
 
                 F3NolanStatData transient = script.InitialStat;
                 Console.WriteLine(transient.ToString());
@@ -87,7 +87,7 @@ namespace FrozenFrogFramework.NolanApp
 
                             while (script.TextBook.Routes.TryGetValue(currentRoute, out var route))
                             {
-                                foreach (var text in route.Text)
+                                foreach (var text in route.Text.Reverse())
                                 {
                                     if (string.IsNullOrWhiteSpace(text) == false)
                                     {
@@ -118,7 +118,6 @@ namespace FrozenFrogFramework.NolanApp
                                     {
                                         currentRoute = route.Flow.ElementAt(inputIndex).Next;
 
-                                        // TODO apply gain and payload to transient stat
                                         List<F3NolanRuleMeta> routeMeta = new List<F3NolanRuleMeta>();
 
                                         foreach (var payload in route.Flow.ElementAt(inputIndex).Payload)
@@ -149,8 +148,35 @@ namespace FrozenFrogFramework.NolanApp
                         {
                             if (string.IsNullOrWhiteSpace(text) == false)
                             {
-                                // TODO handle range for that text key
-                                Console.WriteLine(script.TextBook[text]);
+                                if (script.TextBook.Ranges.TryGetValue(text, out var range))
+                                {
+                                    int lineIndex, lineEnds = text.LastIndexOf('_');
+                                    
+                                    if (lineEnds < 1)
+                                    {
+                                        lineEnds = text.Length;
+                                        lineIndex = 0;                                        
+                                    }
+                                    else
+                                    {
+                                        lineIndex = int.Parse(text.Substring(lineEnds + 1));
+                                    }
+
+                                    foreach(var rangeText in range)
+                                    {
+                                        if (lineIndex == rangeText.Start.Value)
+                                        {
+                                            for (int i = rangeText.Start.Value; i < rangeText.End.Value; i++)
+                                            {
+                                                Console.WriteLine(script.TextBook[$"{text.Substring(0, lineEnds)}_{i}"]);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine(script.TextBook[text]);
+                                }
                             }
                         }
 

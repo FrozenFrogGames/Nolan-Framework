@@ -2,7 +2,6 @@
 using NUnit.Framework.Legacy;
 using System.Linq;
 using FrozenFrogFramework.NolanTech;
-using System.Runtime.CompilerServices;
 
 namespace FrozenFrogFramework.Tests;
 
