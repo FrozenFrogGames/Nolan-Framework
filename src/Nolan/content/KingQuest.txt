@@ -6,14 +6,13 @@ I Love King Quest
 ++ ()-[?door<CAVE>]->()
 ++ (dragon<CAVE>)-{hero}[?door<CAVE>]->(dragon.fire<CAVE>;hero.fire<CAVE>)
 ++ ()-[?castle<HOME>]->()
-++ (!sword;!hero.sword)-[?king]->() #TALK
+++ (?hero;!sword)-[?king]->() #TALK
 Accepterez-vous ma quête preu chevalier?
 -- Oui[.] votre majesté.
 --> (sword) THANK
 -- [Peut-être?] Ça dépend, c'est quoi?
 --- Libérez le royaume du dragon.|Tuez la bête.
 ---- Oui[.] mais j'ai besoin d'une arme.
------ Prenez l'épée royale mon brave.
 ----> (sword) THANK
 ---- Non[!], je suis contre la cruauté animale.
 -- Non[!], merci.
@@ -21,3 +20,5 @@ Accepterez-vous ma quête preu chevalier?
 Merci mon valeureux ...</>et bonne chance!
 ++ (?hero.sword)-[?king]->() #WORRY
 Restez prudent avec ça.|Ça a déjà coupé des têtes!
+++ ()-{sword}[hero]->(hero.sword)
+++ (dragon<CAVE>)-{hero.sword}[?door<CAVE>]->(dragon.kill<CAVE>;hero.kill<CAVE>)

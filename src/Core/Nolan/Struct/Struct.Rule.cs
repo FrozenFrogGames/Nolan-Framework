@@ -8,6 +8,7 @@ using System.Text.Json.Serialization;
 using System.Collections.Immutable;
 using System.Linq.Expressions;
 using Pidgin;
+using System.Security.Cryptography.X509Certificates;
 
 namespace FrozenFrogFramework.NolanTech
 {
@@ -132,13 +133,15 @@ namespace FrozenFrogFramework.NolanTech
             Keys = string.IsNullOrEmpty(textString) ? null : textString;
         }
 
-        public bool Accept(in F3NolanStatData stat, out KeyValuePair<string, F3NolanRuleMeta[]> meta)
+        public bool Accept(string scene, in F3NolanStatData stat, out KeyValuePair<string, F3NolanRuleMeta[]> meta)
         {
             var ruleMatch = Match;
 
-            foreach (var location in stat.Locations.Where(loc => loc.Value.Any(t => t.Value == ruleMatch.Value)))
+            var location = stat.Locations.FirstOrDefault(loc => loc.Key.Equals(scene, StringComparison.OrdinalIgnoreCase));
+            var ruleTags = new HashSet<string>(location.Value.Select(t => t.Value));
+
+            if (location.Value.Any(t => t.Value == ruleMatch.Value))
             {
-                var ruleTags = new HashSet<string>(location.Value.Select(t => t.Value));
                 var ruleMeta = new List<F3NolanRuleMeta>();
 
                 if (ruleMatch.TagOperation == ENolanTagOperation.FailedIfPresent)

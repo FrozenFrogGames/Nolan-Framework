@@ -11,6 +11,7 @@ namespace FrozenFrogFramework.NolanApp
             string contentFullpath = Path.Combine(currentDirectory, filename);
 
             string contentFilename = File.Exists(contentFullpath) ? filename : Path.Combine("content", filename);
+
             if (File.Exists(contentFullpath) == false)
             {
                 contentFullpath = Path.Combine(currentDirectory, contentFilename);
@@ -20,10 +21,10 @@ namespace FrozenFrogFramework.NolanApp
             {
                 string[] script = File.ReadAllLines(contentFullpath);
 
-                F3NolanScriptBuilder builder = new F3NolanScriptBuilder();
-
                 if (F3NolanScriptBuilder.Parse(script, out List<F3NolanScriptBuilder.Line> lines))
                 {
+                    F3NolanScriptBuilder builder = new F3NolanScriptBuilder();
+
                     builder.Build(in lines, out Dictionary<int, object> parts);
 
                     foreach (var key in builder.Keys)
@@ -46,18 +47,18 @@ namespace FrozenFrogFramework.NolanApp
         public void play(string filename)
         {
             F3NolanScriptData script;
+            int index, inputIndex;
+            string? input;
 
             if (load(filename, out script))
             {
-                F3NolanStatData transient = script.InitialStat;
+                Console.Clear();
+                string scene = "HOME";
 
+                F3NolanStatData transient = script.InitialStat;
                 Console.WriteLine(transient.ToString());
 
-                string scene = string.Empty;
-                int index, inputIndex;
-                string? input;
-
-                Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>> options = F3NolanScriptBuilder.Compute(transient, script.RuleBook);
+                Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>> options = F3NolanScriptBuilder.Compute(scene, transient, script.RuleBook);
 
                 while (options.Count() > 0)
                 {
@@ -75,13 +76,10 @@ namespace FrozenFrogFramework.NolanApp
                     {
                         F3NolanRuleMeta[] optionMeta = options.ElementAt(inputIndex).Value.Value;
 
-                        transient = transient.Apply(optionMeta, script.RuleBook, ref scene);
-
+                        transient = transient.Apply(optionMeta, ref scene);
                         Console.WriteLine(transient.ToString());
 
                         string[] optionText = options.ElementAt(inputIndex).Value.Key.Split(',', StringSplitOptions.TrimEntries);
-
-                        bool bHadRoute = false;
 
                         if (optionText.Count() == 1)
                         {
@@ -121,35 +119,42 @@ namespace FrozenFrogFramework.NolanApp
                                         currentRoute = route.Flow.ElementAt(inputIndex).Next;
 
                                         // TODO apply gain and payload to transient stat
+                                        List<F3NolanRuleMeta> routeMeta = new List<F3NolanRuleMeta>();
 
+                                        foreach (var payload in route.Flow.ElementAt(inputIndex).Payload)
+                                        {
+                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payload.Value, string.IsNullOrEmpty(payload.Location) ? scene : payload.Location));
+                                        }
+
+                                        transient = transient.Apply(routeMeta.ToArray(), ref scene);
                                         Console.WriteLine(transient.ToString());
                                     }
                                     else
                                     {
                                         currentRoute = string.Empty;
                                     }
+
+                                    optionText = Array.Empty<string>();
                                 }
                                 else
                                 {
                                     currentRoute = route.Goto ?? string.Empty;
-                                }
 
-                                bHadRoute = true;
+                                    optionText = new string[] { currentRoute };
+                                }
                             }
                         }
                         
-                        if (bHadRoute == false)
+                        foreach (var text in optionText)
                         {
-                            foreach (var text in optionText)
+                            if (string.IsNullOrWhiteSpace(text) == false)
                             {
-                                if (string.IsNullOrWhiteSpace(text) == false)
-                                {
-                                    Console.WriteLine(script.TextBook[text]);
-                                }
+                                // TODO handle range for that text key
+                                Console.WriteLine(script.TextBook[text]);
                             }
                         }
 
-                        options = F3NolanScriptBuilder.Compute(transient, script.RuleBook);
+                        options = F3NolanScriptBuilder.Compute(scene, transient, script.RuleBook);
                     }
                     else
                     {

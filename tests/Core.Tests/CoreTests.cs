@@ -41,7 +41,7 @@ public class CoreTests
         .Flow("TALK-3S", "TALK-3")
         .Route("TALK-1", "TALK-1").Goto("THANK")
         .Route("TALK-2", "TALK-2-0", "TALK-2")
-        .Flow("TALK-2-1S", "TALK-2-1")
+        .Flow("TALK-2-1S", "TALK-2-1").Payload("sword")
         .Flow("TALK-2-2S", "TALK-2-2")
         .Route("TALK-2-1", "TALK-2-1-0", "TALK-2-1").Goto("THANK")
         .Route("TALK-2-2", "TALK-2-2")
@@ -85,7 +85,7 @@ public class CoreTests
                     .Mock("?king", "THANK").Context("?sword")
                     .Mock("?king", "WORRY").Context("?hero.sword").Data,
             Textbook
-        ).SetName("King Quest Script");
+        ).SetName("Full Script");
     }
 
     [Test, TestCaseSource(nameof(NolanParsingUseCases))]

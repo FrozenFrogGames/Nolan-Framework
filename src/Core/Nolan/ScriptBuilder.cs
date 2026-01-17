@@ -270,6 +270,16 @@ namespace FrozenFrogFramework.NolanTech
                 {
                     parts.Add(routeStart + bankIndex, pendingDeadNodes[flowCursor.Name]);
                 }
+                else // special use case with lonely answer line followed by dead-end
+                {
+                    F3NolanRouteData? flowEnds = FilterDeadEnds(bankIndex + 2, flowCursor.Depth, results);
+
+                    if (flowEnds.HasValue)
+                    {
+                        flowStitch.Payload = flowEnds.Value.ContextOrPayload;
+                        flowStitch.Gain = flowEnds.Value.CostOrGain;
+                    }
+                }
 
                 rootNode.Flow.Add(flowStitch);
             }
@@ -318,7 +328,17 @@ namespace FrozenFrogFramework.NolanTech
                         {
                             parts.Add(routeStart + bankIndex, pendingDeadNodes[flowCursor.Name]);
                         }
-    
+                        else // special use case with lonely answer line followed by dead-end
+                        {
+                            F3NolanRouteData? flowEnds = FilterDeadEnds(bankIndex + 2, flowCursor.Depth, results);
+
+                            if (flowEnds.HasValue)
+                            {
+                                flowStitch.Payload = flowEnds.Value.ContextOrPayload;
+                                flowStitch.Gain = flowEnds.Value.CostOrGain;
+                            }
+                        }
+
                         flowNode.Flow.Add(flowStitch);
                     }
                 }
@@ -343,6 +363,7 @@ namespace FrozenFrogFramework.NolanTech
                 List<string> deadKeys = new List<string>();
 
                 F3NolanRouteData? flowEnds = FilterDeadEnds(bankIndex, route.Depth, bankValues);
+
                 if (flowEnds.HasValue)
                 {
                     deadKeys.AddRange(flowEnds.Value.Keys);
@@ -440,6 +461,7 @@ namespace FrozenFrogFramework.NolanTech
             if (index < routes.Count)
             {
                 F3NolanRouteData route = routes[index];
+
                 if (route.IsDeadEnds && route.Depth == depth)
                 {
                     return route;
@@ -449,7 +471,7 @@ namespace FrozenFrogFramework.NolanTech
             return null;
         }
 
-        public static Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>> Compute(in F3NolanStatData stat, in F3NolanRuleData[] rules)
+        public static Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>> Compute(in string scene, in F3NolanStatData stat, in F3NolanRuleData[] rules)
         {
             List<F3NolanRuleData> rulebook = new List<F3NolanRuleData>();
 
@@ -469,7 +491,7 @@ namespace FrozenFrogFramework.NolanTech
                     throw NolanException.ContextError($"Rulebook contains '{ruleName}' already.", ENolanScriptContext.Rule, ENolanScriptError.DuplicateKey);
                 }
 
-                if (rule.Accept(stat, out var meta))
+                if (rule.Accept(scene, stat, out var meta))
                 {
                     result.Add(ruleName, meta);
                 }

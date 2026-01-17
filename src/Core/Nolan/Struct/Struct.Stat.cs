@@ -74,7 +74,7 @@ namespace FrozenFrogFramework.NolanTech
             }
         }
 
-        public F3NolanStatData Apply(in F3NolanRuleMeta[] meta, in F3NolanRuleData[] rulebook, ref string scene)
+        public F3NolanStatData Apply(in F3NolanRuleMeta[] meta, ref string scene)
         {
             var statLocations = Locations.ToDictionary(
                 loc => loc.Key,
