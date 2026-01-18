@@ -66,6 +66,88 @@ namespace FrozenFrogFramework.NolanTech
             Locations.AddRange(sequence);
         }
 
+        public string ComputeSequence(string textKey, int textCount)
+        {
+            string resultKey = textKey;
+            string testKey = textKey + "_";
+
+            if (Locations.Any(loc => loc.Key.Equals("LOOP", StringComparison.OrdinalIgnoreCase)))
+            {
+                var location = Locations.First(loc => loc.Key.Equals("LOOP", StringComparison.OrdinalIgnoreCase));
+
+                if (location.Value.Tags.Any(tag => tag.Value.StartsWith(testKey)))
+                {
+                    List<string> newTags = new List<string>();
+
+                    foreach(var tag in location.Value.Tags)
+                    {
+                        if (tag.Value.StartsWith(testKey))
+                        {
+                            int lineEnds = tag.Value.LastIndexOf('_');
+                            int lineIndex = int.Parse(tag.Value.Substring(lineEnds + 1));
+
+                            if (lineIndex + 1 < textCount)
+                            {
+                                newTags.Add($"{textKey}_{lineIndex + 1}");
+                            }
+                            else
+                            {
+                                newTags.Add($"{textKey}_0");
+                            }
+
+                            resultKey = tag.Value;
+                        }
+                        else
+                        {
+                            newTags.Add(tag.RawValue);
+                        }
+                    }
+
+                    Locations.Remove(location);
+                    Locations.Add(new KeyValuePair<string, F3NolanGameTagSet>("LOOP", new F3NolanGameTagSet(newTags)));
+                }
+            }
+
+            if (Locations.Any(loc => loc.Key.Equals("ONCE", StringComparison.OrdinalIgnoreCase)))
+            {
+                var location = Locations.First(loc => loc.Key.Equals("ONCE", StringComparison.OrdinalIgnoreCase));
+
+                if (location.Value.Tags.Any(tag => tag.Value.StartsWith(testKey)))
+                {
+                    List<string> newTags = new List<string>();
+
+                    foreach(var tag in location.Value.Tags)
+                    {
+                        if (tag.Value.StartsWith(testKey))
+                        {
+                            int lineEnds = tag.Value.LastIndexOf('_');
+                            int lineIndex = int.Parse(tag.Value.Substring(lineEnds + 1));
+
+                            if (lineIndex + 1 < textCount)
+                            {
+                                newTags.Add($"{textKey}_{lineIndex + 1}");
+                            }
+                            else
+                            {
+                                return tag.Value; // reach the end of ONCE sequence
+                            }
+
+                            resultKey = tag.Value;
+                        }
+                        else
+                        {
+                            newTags.Add(tag.RawValue);
+                        }
+                    }
+
+                    Locations.Remove(location);
+                    Locations.Add(new KeyValuePair<string, F3NolanGameTagSet>("ONCE", new F3NolanGameTagSet(newTags)));
+                }
+            }
+
+            return resultKey;
+        }
+
         public F3NolanGameTagSet this[string name]
         {
             get

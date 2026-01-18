@@ -119,7 +119,10 @@ namespace FrozenFrogFramework.NolanApp
                                 {
                                     if (string.IsNullOrWhiteSpace(text) == false)
                                     {
-                                        string result = script.TextBook[text];
+                                        int textCount = script.TextBook.Lines[text].Length;
+                                        string textKey = transient.ComputeSequence(text, textCount);
+
+                                        string result = script.TextBook[textKey];
 
                                         if (result.Equals("<$EOF/>")) // TODO handle signal better
                                         {
@@ -206,10 +209,13 @@ namespace FrozenFrogFramework.NolanApp
                                 }
                                 else
                                 {
-                                    lineIndex = int.Parse(text.Substring(lineEnds + 1));
+                                        lineIndex = int.Parse(text.Substring(lineEnds + 1));
                                 }
 
+                                int textCount = script.TextBook.Lines[text].Length;
                                 string textKey = text.Substring(0, lineEnds);
+
+                                textKey = transient.ComputeSequence(textKey, textCount);
 
                                 if (script.TextBook.Ranges.TryGetValue(textKey, out var range))
                                 {
