@@ -26,19 +26,6 @@ namespace FrozenFrogFramework.NolanTech
             loopKeys = new List<string>();
             onceKeys = new List<string>();
         }
-        public string[] GetInitialKeys(string key) // deprecated
-        {
-            return F3NolanTextBook.GetInitialKeys(
-                key,
-                lines.ToDictionary(
-                    line => line.Key,
-                    line => line.Value.ToArray()
-                ),
-                ranges.ToDictionary(
-                    range => range.Key,
-                    range=> range.Value.ToArray()
-                ));
-        }
         public KeyValuePair<string, F3NolanGameTagSet>[] GetInitialSequence()
         {
             var result = new List<KeyValuePair<string, F3NolanGameTagSet>>();
@@ -205,103 +192,7 @@ namespace FrozenFrogFramework.NolanTech
     public class F3NolanTextBook
     {
         public static F3NolanTextBook Empty => new F3NolanTextBook(new Dictionary<string, string[]>(), new Dictionary<string, Range[]>(), new Dictionary<string, F3NolanRouteStruct>());
-        public static string[] GetInitialKeys(string key, Dictionary<string, string[]> lines, Dictionary<string, Range[]> ranges) // deprecated
-        {
-            List<string> result = new List<string>();
-            if (lines.ContainsKey(key))
-            {
-                int lineCount = lines[key].Count();
-
-                if (ranges.ContainsKey(key))
-                {
-                    if (ranges[key].First().Start.Value == 0)
-                    {
-                        lineCount = ranges[key].First().End.Value;
-                    }
-                }
-
-                for (int i = lineCount; i > 0; --i)
-                {
-                    string line = lines[key][i - 1];
-
-                    if (line.StartsWith("<$") && line.EndsWith("/>"))
-                    {
-                        result.Add(line);
-                    }
-                    else
-                    {
-                        result.Add(i == 1 ? $"{key}" : $"{key}_{i - 1}");
-                    }
-                }
-            }
-            return result.ToArray();
-        }
-        public string[] GetInitialKeys(string key) { return F3NolanTextBook.GetInitialKeys(key, lines, ranges); }
         private Dictionary<string, string[]> lines;
-        public void ComputeKeys(string key, F3NolanStatData stat, ref Dictionary<string, int> stack, ref List<string> results)
-        {
-            string resultKey;
-
-            if (key.EndsWith('%')) // print looping sequence
-            {
-                resultKey = key.Substring(0, key.Count() - 1);
-
-                // TODO support range at index to push subset of lines
-
-                if (stack.TryGetValue(key, out var index))
-                {
-                    resultKey = $"{resultKey}_{index % lines.Count()}";
-                    stack[key] = ++index;
-                }
-                else
-                {
-                    stack.Add(key, 1);
-                }
-            }
-            else if (key.EndsWith('#')) // print sequence once
-            {
-                resultKey = key.Substring(0, key.Count() - 1);
-
-                // TODO support range at index to push subset of lines
-
-                if (stack.TryGetValue(key, out var index))
-                {
-                    resultKey = $"{resultKey}_{index++}";
-
-                    int lastIndex = lines.Count() - 1; // repeat last line
-
-                    stack[key] = index > lastIndex ? lastIndex : index;
-                }
-                else
-                {
-                    stack.Add(key, 1);
-                }
-            }
-            else
-            {
-                int succeedIfPresent = key.IndexOf('?');
-                int failedIfPresent = key.IndexOf('!');
-
-                if (succeedIfPresent == -1 && failedIfPresent == -1)
-                {
-                    resultKey = key;
-                }
-                else
-                {
-                    string tagValue = succeedIfPresent > -1 ? key.Substring(succeedIfPresent + 1) : key.Substring(failedIfPresent + 1);
-
-                    var tagLocation = stat.Locations.Where(loc => loc.Value.Any(t => t.Value == tagValue));
-                    if ((succeedIfPresent > -1 && tagLocation is null) || (failedIfPresent > -1 && tagLocation is not null))
-                    {
-                        return; // condition failed
-                    }
-
-                    resultKey = succeedIfPresent > -1 ? key.Substring(0, succeedIfPresent) : key.Substring(0, failedIfPresent);
-                }
-            }
-
-            results.AddRange(resultKey.Split(','));
-        }
         public string this[string key] { get
         {
             bool bLoop = key.EndsWith('%');

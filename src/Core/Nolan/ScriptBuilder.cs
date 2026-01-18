@@ -265,7 +265,6 @@ namespace FrozenFrogFramework.NolanTech
 
             var initialKey = routeCache.GetShortName();
 
-//          F3NolanRouteStruct rootNode = new F3NolanRouteStruct(_textbook.GetInitialKeys(initialKey)); deprecated
             F3NolanRouteStruct rootNode = new F3NolanRouteStruct(new string[] {initialKey});
 
             List<int> bankIndexes = FilterRoute(0, 0, results);
@@ -531,10 +530,6 @@ namespace FrozenFrogFramework.NolanTech
                     return "--";
                 case ENolanScriptContext.Stat:
                     return "==";
-                case ENolanScriptContext.Knot: // deprecated
-                    return ">>";
-                case ENolanScriptContext.Text: // deprecated
-                    return "##";
                 case ENolanScriptContext.Page:
                     return "**";
                 case ENolanScriptContext.Goal:
@@ -554,14 +549,12 @@ namespace FrozenFrogFramework.NolanTech
                     return ENolanScriptContext.Route;
                 case "==":
                     return ENolanScriptContext.Stat;
-                case ">>":
-                    return ENolanScriptContext.Knot; // deprecated
                 case "**":
                     return ENolanScriptContext.Page;
                 case "??":
                     return ENolanScriptContext.Goal;
                 default:
-                    return ENolanScriptContext.Text; // deprecated
+                    return ENolanScriptContext.Text;
             }
         }
     }
