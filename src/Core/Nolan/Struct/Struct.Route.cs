@@ -169,7 +169,7 @@ namespace FrozenFrogFramework.NolanTech
 
                 CostOrGain = ExtractFromPayloadOrGainSyntax(false, ref resultLine);
 
-                GotoName = string.IsNullOrEmpty(resultLine) ? "EOF" : resultLine.TrimEnd();
+                GotoName = string.IsNullOrWhiteSpace(resultLine) ? string.Empty : resultLine.TrimEnd();
             }
             else
             {

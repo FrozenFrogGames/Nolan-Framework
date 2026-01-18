@@ -139,79 +139,23 @@ namespace FrozenFrogFramework.NolanApp
                                     foreach (var option in route.Flow)
                                     {
                                         List<F3NolanRuleMeta> flowMeta = new List<F3NolanRuleMeta>();
-                                        bool flowIsValid = true;
 
-                                        foreach (var contextTag in option.Context)
-                                        {
-                                            switch (contextTag.TagOperation)
-                                            {
-                                                case ENolanTagOperation.RemoveOrAppend:
-                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == false)
-                                                    {
-                                                        flowIsValid = false;
-                                                    }
-                                                    else
-                                                    {
-                                                        var contextMeta = new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location);
-
-                                                        flowMeta.Add(contextMeta);
-                                                    }
-                                                    break;
-
-                                                case ENolanTagOperation.FailedIfPresent:
-                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == true)
-                                                    {
-                                                        flowIsValid = false;
-                                                    }
-                                                    break;
-
-                                                case ENolanTagOperation.SucceedIfPresent:
-                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == false)
-                                                    {
-                                                        flowIsValid = false;
-                                                    }
-                                                    break;
-                                            }
-                                        }
-
-                                        if (flowIsValid == false)
+                                        if (ValidateContext(scene, option.Context, in transient, ref flowMeta) == false)
                                         {
                                             continue;
                                         }
 
-                                        foreach (var payloadTag in option.Payload)
+                                        if (ValidateContext("DRAG", option.Cost, in transient, ref flowMeta) == false)
                                         {
-                                            switch (payloadTag.TagOperation)
-                                            {
-                                                case ENolanTagOperation.RemoveOrAppend:
-                                                    if (transient.ContainsTag(payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location))
-                                                    {
-                                                        flowIsValid = false;
-                                                    }
-                                                    else
-                                                    {
-                                                        var payloadMeta = new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location);
-
-                                                        flowMeta.Add(payloadMeta);
-                                                    }
-                                                    break;
-
-                                                case ENolanTagOperation.FailedIfPresent:
-                                                    if (transient.ContainsTag(payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location) == false)
-                                                    {
-                                                        flowIsValid = false;
-                                                    }
-                                                    else
-                                                    {
-                                                        var payloadMeta = new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location);
-
-                                                        flowMeta.Add(payloadMeta);
-                                                    }
-                                                    break;
-                                            }
+                                            continue;
                                         }
 
-                                        if (flowIsValid == false)
+                                        if (ValidatePayload(scene, option.Payload, in transient, ref flowMeta) == false)
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ValidatePayload("DRAG", option.Gain, in transient, ref flowMeta) == false)
                                         {
                                             continue;
                                         }
@@ -229,8 +173,8 @@ namespace FrozenFrogFramework.NolanApp
                                     if (int.TryParse(input, out inputIndex) && inputIndex >= 0 && inputIndex < flowOptions.Count())
                                     {
                                         currentRoute = flowOptions.ElementAt(inputIndex).Value.Key;
-
                                         transient = transient.Apply(flowOptions.ElementAt(inputIndex).Value.Value, ref scene);
+
                                         Console.WriteLine(transient.ToString());
                                     }
                                     else
@@ -311,6 +255,85 @@ namespace FrozenFrogFramework.NolanApp
                     }
                 }               
             }
+        }
+
+        static private bool ValidateContext(string scene, F3NolanGameTagSet tags, in F3NolanStatData stat, ref List<F3NolanRuleMeta> meta)
+        {
+            foreach (var tag in tags)
+            {
+                string tagLocation = scene.Equals("DRAG") ? scene : (string.IsNullOrEmpty(tag.Location) ? scene : tag.Location);
+
+                switch (tag.TagOperation)
+                {
+                    case ENolanTagOperation.RemoveOrAppend:
+                        if (stat.ContainsTag(tag.Value, tagLocation) == false)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            meta.Add(new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, tag.Value, tagLocation));
+                            break;
+                        }
+
+                    case ENolanTagOperation.FailedIfPresent:
+                        if (stat.ContainsTag(tag.Value, tagLocation) == true)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                    case ENolanTagOperation.SucceedIfPresent:
+                        if (stat.ContainsTag(tag.Value, tagLocation) == false)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                }
+            }
+
+            return true;
+        }
+
+        static private bool ValidatePayload(string scene, F3NolanGameTagSet tags, in F3NolanStatData stat, ref List<F3NolanRuleMeta> meta)
+        {
+            foreach (var tag in tags)
+            {
+                string tagLocation = scene.Equals("DRAG") ? scene : (string.IsNullOrEmpty(tag.Location) ? scene : tag.Location);
+
+                switch (tag.TagOperation)
+                {
+                    case ENolanTagOperation.RemoveOrAppend:
+                        if (stat.ContainsTag(tag.Value, tagLocation))
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            meta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, tag.Value, tagLocation));
+                            break;
+                        }
+
+                    case ENolanTagOperation.FailedIfPresent:
+                        if (stat.ContainsTag(tag.Value, tagLocation) == false)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            meta.Add(new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, tag.Value, tagLocation));
+                            break;
+                        }
+                }
+            }
+
+            return true;
         }
 
         static private bool load(string filename, out F3NolanScriptData script)
