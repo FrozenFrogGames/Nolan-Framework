@@ -265,7 +265,8 @@ namespace FrozenFrogFramework.NolanTech
 
             var initialKey = routeCache.GetShortName();
 
-            F3NolanRouteStruct rootNode = new F3NolanRouteStruct(_textbook.GetInitialKeys(initialKey));
+//          F3NolanRouteStruct rootNode = new F3NolanRouteStruct(_textbook.GetInitialKeys(initialKey)); deprecated
+            F3NolanRouteStruct rootNode = new F3NolanRouteStruct(new string[] {initialKey});
 
             List<int> bankIndexes = FilterRoute(0, 0, results);
 

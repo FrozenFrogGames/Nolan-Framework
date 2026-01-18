@@ -1,4 +1,4 @@
-== BOF [CAVE, castle;dragon] [HOME, door;hero;king] [ONCE, TALK_1] [LOOP, TALK-2-0_1]
+== BOF [CAVE, castle;dragon] [HOME, door;hero;king]
 ++ ()-[?door<CAVE>]->()
 ++ ()-[?castle<HOME>]->()
 ++ ()-[?hero]->() #HELLO

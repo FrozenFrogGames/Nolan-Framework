@@ -38,7 +38,7 @@ namespace FrozenFrogFramework.NolanTech
 
         // Parser for content that can be an identifier (alphanumeric, '.', '_', '+', '^', '@').
         public static readonly Parser<char, string> IdentifierContentParser =
-            Token(LetterOrDigit.Or(OneOf('.', '_', '+', '*')).AtLeastOnceString())
+            Token(LetterOrDigit.Or(OneOf('.', '_', '-', '+', '*')).AtLeastOnceString())
             .Where(s => !string.IsNullOrWhiteSpace(s));
 
         // Parser for the optional <LOCATION> suffix.
