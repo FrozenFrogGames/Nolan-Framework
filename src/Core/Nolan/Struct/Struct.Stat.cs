@@ -61,7 +61,7 @@ namespace FrozenFrogFramework.NolanTech
             Locations = new List<KeyValuePair<string, F3NolanGameTagSet>>(locations);
         }
 
-        public KeyValuePair<string, F3NolanGameTagSet> this[string name]
+        public F3NolanGameTagSet this[string name]
         {
             get
             {
@@ -70,8 +70,20 @@ namespace FrozenFrogFramework.NolanTech
                 {
                     throw NolanException.ScriptError($"Location '{name}' not found in stat.", ENolanScriptError.KeyNotFound);
                 }
-                return location;
+                return location.Value;
             }
+        }
+
+        public bool ContainsTag(string tag, string location)
+        {
+            var loc = Locations.FirstOrDefault(loc => loc.Key.Equals(location, StringComparison.OrdinalIgnoreCase));
+
+            if (loc.Key == null)
+            {
+                return false;
+            }
+            
+            return loc.Value.Contains(tag);
         }
 
         public F3NolanStatData Apply(in F3NolanRuleMeta[] meta, ref string scene)

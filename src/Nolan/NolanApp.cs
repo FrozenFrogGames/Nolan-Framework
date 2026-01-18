@@ -134,33 +134,103 @@ namespace FrozenFrogFramework.NolanApp
                                 {
                                     index = 0;
 
-                                    foreach (var option in route.Flow) // TODO filter cost and context from transient stat
+                                    Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>> flowOptions = new Dictionary<string, KeyValuePair<string, F3NolanRuleMeta[]>>();
+
+                                    foreach (var option in route.Flow)
                                     {
-                                        Console.WriteLine($"[{index++}] {script.TextBook[option.Choice]}");
+                                        List<F3NolanRuleMeta> flowMeta = new List<F3NolanRuleMeta>();
+                                        bool flowIsValid = true;
+
+                                        foreach (var contextTag in option.Context)
+                                        {
+                                            switch (contextTag.TagOperation)
+                                            {
+                                                case ENolanTagOperation.RemoveOrAppend:
+                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == false)
+                                                    {
+                                                        flowIsValid = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        var contextMeta = new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location);
+
+                                                        flowMeta.Add(contextMeta);
+                                                    }
+                                                    break;
+
+                                                case ENolanTagOperation.FailedIfPresent:
+                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == true)
+                                                    {
+                                                        flowIsValid = false;
+                                                    }
+                                                    break;
+
+                                                case ENolanTagOperation.SucceedIfPresent:
+                                                    if (transient.ContainsTag(contextTag.Value, string.IsNullOrEmpty(contextTag.Location) ? scene : contextTag.Location) == false)
+                                                    {
+                                                        flowIsValid = false;
+                                                    }
+                                                    break;
+                                            }
+                                        }
+
+                                        if (flowIsValid == false)
+                                        {
+                                            continue;
+                                        }
+
+                                        foreach (var payloadTag in option.Payload)
+                                        {
+                                            switch (payloadTag.TagOperation)
+                                            {
+                                                case ENolanTagOperation.RemoveOrAppend:
+                                                    if (transient.ContainsTag(payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location))
+                                                    {
+                                                        flowIsValid = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        var payloadMeta = new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location);
+
+                                                        flowMeta.Add(payloadMeta);
+                                                    }
+                                                    break;
+
+                                                case ENolanTagOperation.FailedIfPresent:
+                                                    if (transient.ContainsTag(payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location) == false)
+                                                    {
+                                                        flowIsValid = false;
+                                                    }
+                                                    else
+                                                    {
+                                                        var payloadMeta = new F3NolanRuleMeta(ENolanRuleOperation.RemoveTag, payloadTag.Value, string.IsNullOrEmpty(payloadTag.Location) ? scene : payloadTag.Location);
+
+                                                        flowMeta.Add(payloadMeta);
+                                                    }
+                                                    break;
+                                            }
+                                        }
+
+                                        if (flowIsValid == false)
+                                        {
+                                            continue;
+                                        }
+
+                                        string optionString = script.TextBook[option.Choice];
+
+                                        flowOptions.Add(optionString, new KeyValuePair<string, F3NolanRuleMeta[]>(option.Next, flowMeta.ToArray()));
+
+                                        Console.WriteLine($"[{index++}] {optionString}");
                                     }
 
                                     Console.Write("Choose an option: ");
                                     input = Console.ReadLine();
 
-                                    if (int.TryParse(input, out inputIndex) && inputIndex >= 0 && inputIndex < route.Flow.Count())
+                                    if (int.TryParse(input, out inputIndex) && inputIndex >= 0 && inputIndex < flowOptions.Count())
                                     {
-                                        currentRoute = route.Flow.ElementAt(inputIndex).Next;
+                                        currentRoute = flowOptions.ElementAt(inputIndex).Value.Key;
 
-                                        List<F3NolanRuleMeta> routeMeta = new List<F3NolanRuleMeta>();
-
-                                        foreach (var payload in route.Flow.ElementAt(inputIndex).Payload)
-                                        {
-                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AssertNoTag, payload.Value, string.IsNullOrEmpty(payload.Location) ? scene : payload.Location));
-                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payload.Value, string.IsNullOrEmpty(payload.Location) ? scene : payload.Location));
-                                        }
-
-                                        foreach (var payload in route.Flow.ElementAt(inputIndex).Gain)
-                                        {
-                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AssertNoTag, payload.Value, "DRAG"));
-                                            routeMeta.Add(new F3NolanRuleMeta(ENolanRuleOperation.AppendTag, payload.Value, "DRAG"));
-                                        }
-
-                                        transient = transient.Apply(routeMeta.ToArray(), ref scene);
+                                        transient = transient.Apply(flowOptions.ElementAt(inputIndex).Value.Value, ref scene);
                                         Console.WriteLine(transient.ToString());
                                     }
                                     else
@@ -246,6 +316,11 @@ namespace FrozenFrogFramework.NolanApp
         static private bool load(string filename, out F3NolanScriptData script)
         {
             string file = Path.Combine(Directory.GetCurrentDirectory(), filename);
+
+            if (File.Exists(file) == false)
+            {
+                file = Path.Combine(Directory.GetCurrentDirectory(), Path.Combine("content", filename));
+            }
 
             if (File.Exists(file))
             {

@@ -5,28 +5,23 @@
 Hello World
 ++ (dragon<CAVE>)-{hero}[?door<CAVE>]->(dragon.fire<CAVE>;hero.kill<CAVE>) #GAMEOVER
 <$EOF/>
-++ (hero)-[sword]->(hero.sword)
-++ ()-{sword}[hero]->(hero.sword)
 ++ (?king)-{hero.sword}[?castle<HOME>]->(hero.sword<HOME>)
 ++ ()-[?hero.sword]->() #QUEST
 I Love King Quest
-++ (?hero;!sword)-[?king]->() #TALK
+++ (?hero)-[?king]->() #TALK
 Accepterez-vous ma quête preu chevalier?
--- Oui[.] votre majesté.
---> (sword) THANK
+-- (hero) Oui[.] votre majesté.
+--> (hero.sword) THANK
 -- [Peut-être?] Ça dépend, c'est quoi?
 --- Libérez le royaume du dragon.|Tuez la bête.
----- Oui[.] mais j'ai besoin d'une arme.
+---- (hero) Oui[.] mais j'ai besoin d'une arme.
 ----- Prenez l'épée royale mon brave.
-----> (sword) THANK
+----> (hero.sword) THANK
 ---- Non[!], je suis contre la cruauté animale.
 -- Non[!], merci.
-++ (?sword)-[?king]->() #THANK
-Merci mon valeureux ...</>et bonne chance!
+++ (?hero.sword)-[?king]->() #THANK
+Merci mon valeureux</>et bonne chance!
 ++ (dragon<CAVE>)-{hero.sword}[?door<CAVE>]->(dragon.kill<CAVE>;hero.sword<CAVE>) #HAPPY
 Tous les gens du royame vécurent heureux et eurent beaucoup d'enfants.<$EOF/>
-++ (?hero.sword)-[?king]->() #WORRY
-Restez prudent avec ça.|Ça a déjà coupé des têtes!
-++ (hero)-{sword}[king]->(hero.sword;king.kill) #TYRAN
-Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.<$EOF/>
 ++ ()-{hero.sword}[king]->(hero.sword;king.kill) #TYRAN
+Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.<$EOF/>
