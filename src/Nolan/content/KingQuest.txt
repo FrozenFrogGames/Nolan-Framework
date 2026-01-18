@@ -1,4 +1,4 @@
-== BOF [CAVE, castle;dragon] [HOME, door;hero;king]
+== BOF [CAVE, castle;dragon] [HOME, door;hero;king] [ONCE, TALK_1] [LOOP, TALK-2-0_1]
 ++ ()-[?door<CAVE>]->()
 ++ ()-[?castle<HOME>]->()
 ++ ()-[?hero]->() #HELLO
@@ -9,11 +9,11 @@ Hello World
 ++ ()-[?hero.sword]->() #QUEST
 I Love King Quest
 ++ (?hero)-[?king]->() #TALK
-Accepterez-vous ma quête preu chevalier?
+(?<Accepterez-vous ma quête preu chevalier?><Sauverez-vous le royaume mon ami?>)
 -- (hero) Oui[.] votre majesté.
 --> (hero.sword) THANK
 -- [Peut-être?] Ça dépend, c'est quoi?
---- Libérez le royaume du dragon.|Tuez la bête.
+--- (!<Libérez le royaume du dragon.><Tuez la bête.>)
 ---- (hero) Oui[.] mais j'ai besoin d'une arme.
 ----- Prenez l'épée royale mon brave.
 ----> (hero.sword) THANK

@@ -14,12 +14,19 @@ namespace FrozenFrogFramework.NolanTech
     {
         private Dictionary<string, List<string>> lines;
         private Dictionary<string, List<Range>> ranges;
+
+        private List<string> loopKeys;
+        private List<string> onceKeys;
+
         public F3NolanMutableTextBook()
         {
             lines = new Dictionary<string, List<string>>();
             ranges = new Dictionary<string, List<Range>>();
+
+            loopKeys = new List<string>();
+            onceKeys = new List<string>();
         }
-        public string[] GetInitialKeys(string key)
+        public string[] GetInitialKeys(string key) // deprecated
         {
             return F3NolanTextBook.GetInitialKeys(
                 key,
@@ -32,6 +39,23 @@ namespace FrozenFrogFramework.NolanTech
                     range=> range.Value.ToArray()
                 ));
         }
+        public KeyValuePair<string, F3NolanGameTagSet>[] GetInitialSequence()
+        {
+            var result = new List<KeyValuePair<string, F3NolanGameTagSet>>();
+
+            if (loopKeys.Count() > 0)
+            {
+                result.Add(new KeyValuePair<string, F3NolanGameTagSet>("LOOP", new F3NolanGameTagSet(loopKeys)));
+            }
+
+            if (onceKeys.Count() > 0)
+            {
+                result.Add(new KeyValuePair<string, F3NolanGameTagSet>("ONCE", new F3NolanGameTagSet(onceKeys)));
+            }
+
+            return result.ToArray();
+        }
+
         public Dictionary<string, string[]> Lines => lines.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray());
         public Dictionary<string, Range[]> Ranges => ranges.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray());
         public IEnumerable<KeyValuePair<string, string[]>> GetIterator()
@@ -48,14 +72,17 @@ namespace FrozenFrogFramework.NolanTech
         {
             lines.Clear();
             ranges.Clear();
+
+            loopKeys.Clear();
+            onceKeys.Clear();
         }
         public string[] AppendLine(string name, string line)
         {
             bool bIsContainsName = lines.ContainsKey(name);
 
-            if (line.StartsWith('(') && line.EndsWith(">)"))
+            if (line.StartsWith('(') && line.TrimEnd().EndsWith(">)"))
             {
-                if (bIsContainsName) // TODO need to add starting index in key notation in order to differ when sharing name
+                if (bIsContainsName)
                 {
                     throw NolanException.ContextError($"Sequence '{name}' already exists.", ENolanScriptContext.Text, ENolanScriptError.DuplicateKey);
                 }
@@ -67,12 +94,21 @@ namespace FrozenFrogFramework.NolanTech
                     throw NolanException.ContextError($"Sequence '{name}' delimiter '{line[1]}' is invalid.", ENolanScriptContext.Text);
                 }
 
-                foreach (string sequenceLine in line.Substring(3, line.Count() - 5).Split("><"))
+                foreach (string sequenceLine in line.Substring(3, line.Count() - 6).Split("><"))
                 {
                     AppendLine(name, sequenceLine);
                 }
 
-                return new string[] { $"{name}{(bIsLoop ? '%' : '#')}" }; // TODO support signal into text sequence syntax
+                if (bIsLoop)
+                {
+                    loopKeys.Add($"{name}_0");
+                }
+                else
+                {
+                    onceKeys.Add($"{name}_0");
+                }
+
+                return new string[] { name };
             }
 
             List<string> trimLines = new List<string>();
@@ -169,7 +205,7 @@ namespace FrozenFrogFramework.NolanTech
     public class F3NolanTextBook
     {
         public static F3NolanTextBook Empty => new F3NolanTextBook(new Dictionary<string, string[]>(), new Dictionary<string, Range[]>(), new Dictionary<string, F3NolanRouteStruct>());
-        public static string[] GetInitialKeys(string key, Dictionary<string, string[]> lines, Dictionary<string, Range[]> ranges)
+        public static string[] GetInitialKeys(string key, Dictionary<string, string[]> lines, Dictionary<string, Range[]> ranges) // deprecated
         {
             List<string> result = new List<string>();
             if (lines.ContainsKey(key))
@@ -268,6 +304,14 @@ namespace FrozenFrogFramework.NolanTech
         }
         public string this[string key] { get
         {
+            bool bLoop = key.EndsWith('%');
+            bool bSequence = key.EndsWith('#');
+
+            if (bLoop || bSequence)
+            {
+                key = key.Substring(0, key.Count() - 1);
+            }
+
             int lineEnds = key.LastIndexOf('_');
             if (lines.Count() == 1 || lineEnds < 1)
             {

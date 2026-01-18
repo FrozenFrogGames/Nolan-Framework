@@ -119,7 +119,7 @@ namespace FrozenFrogFramework.NolanApp
                                 {
                                     if (string.IsNullOrWhiteSpace(text) == false)
                                     {
-                                        string result = text.EndsWith('%') ? script.TextBook[text.Substring(0, text.Length - 1)] : script.TextBook[text];
+                                        string result = script.TextBook[text];
 
                                         if (result.Equals("<$EOF/>")) // TODO handle signal better
                                         {
@@ -192,7 +192,7 @@ namespace FrozenFrogFramework.NolanApp
                                 }
                             }
                         }
-                        
+
                         foreach (var text in optionText)
                         {
                             if (string.IsNullOrWhiteSpace(text) == false)
@@ -301,7 +301,7 @@ namespace FrozenFrogFramework.NolanApp
             return true;
         }
 
-        static private bool ValidatePayload(string scene, F3NolanGameTagSet tags, in F3NolanStatData stat, ref List<F3NolanRuleMeta> meta)
+        static private bool ValidatePayload(string scene, in F3NolanGameTagSet tags, in F3NolanStatData stat, ref List<F3NolanRuleMeta> meta)
         {
             foreach (var tag in tags)
             {

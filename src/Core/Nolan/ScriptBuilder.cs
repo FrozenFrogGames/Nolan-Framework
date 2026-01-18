@@ -202,6 +202,10 @@ namespace FrozenFrogFramework.NolanTech
                 if (lines[_tapeStart].Delimiter == '=' && parts[_tapeStart] is F3NolanStatData stat)
                 {
                     scriptStat = stat;
+
+                    var sequenceStat = _textbook.GetInitialSequence();
+
+                    scriptStat.InitializeSequence(sequenceStat);
                 }
 
                 List<F3NolanRuleData> rulebook = new List<F3NolanRuleData>();

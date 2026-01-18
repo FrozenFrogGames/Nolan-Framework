@@ -61,7 +61,7 @@ public class CoreTests
                 "-- Oui[.] votre majesté.",
                 "--> (sword) THANK",
                 "-- [Peut-être?] Ça dépend, c'est quoi?",
-                "--- Libérez le royaume du dragon.|Tuez la bête.",
+                "--- (?<Libérez le royaume du dragon.><Tuez la bête.>)",
                 "---- Oui[.] mais j'ai besoin d'une arme.",
                 "----- Prenez l'épée royale mon brave.",
                 "----> (sword) THANK",
@@ -74,7 +74,8 @@ public class CoreTests
             },
             "KINGQUEST",
             Stat.Mock("CAVE", "castle", "dragon")
-                .Mock("HOME", "door", "hero", "king").Data,
+                .Mock("HOME", "door", "hero", "king")
+                .Mock("LOOP", "TALK-2-0_0").Data,
             Rulebook.Mock("?hero", "HELLO")
                     .Mock("?hero.sword", "QUEST")
                     .Mock("?door<CAVE>")
@@ -85,6 +86,18 @@ public class CoreTests
                     .Mock("?king", "WORRY").Context("?hero.sword").Data,
             Textbook
         ).SetName("Full Script");
+
+        yield return new TestCaseData(
+            new string[] {
+                "== BOF [HOME, hero;king]",
+                "++ (?hero)-[?king]->() #TALK",
+                "(!<Accepterez-vous ma quête preu chevalier?><Sauverez-vous le royaume mon ami?>)"
+            },
+            "BOF",
+            Stat.Mock("HOME", "hero", "king").Mock("ONCE", "TALK_0").Data,
+            Rulebook.Mock("?king", "TALK").Context("?hero").Data,
+            new TextMock().Text("TALK", "Accepterez-vous ma quête preu chevalier?", "Sauverez-vous le royaume mon ami?")
+        ).SetName("Simple Talk");
     }
 
     [Test, TestCaseSource(nameof(NolanParsingUseCases))]

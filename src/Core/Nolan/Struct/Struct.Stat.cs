@@ -61,6 +61,11 @@ namespace FrozenFrogFramework.NolanTech
             Locations = new List<KeyValuePair<string, F3NolanGameTagSet>>(locations);
         }
 
+        public void InitializeSequence(in KeyValuePair<string, F3NolanGameTagSet>[] sequence)
+        {
+            Locations.AddRange(sequence);
+        }
+
         public F3NolanGameTagSet this[string name]
         {
             get
