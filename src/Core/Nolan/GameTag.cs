@@ -139,9 +139,15 @@ namespace FrozenFrogFramework.NolanTech
                 Meter = new MeterRange(rangeStart, rangeEnd);
             }
 
+            // keep track of every gameplay tags created ..
             if (GameTags.Contains(Value) == false)
             {
-                GameTags.Add(Value);
+                int digitIndex = Value.IndexOf('_');
+                // .. but ignore tag that ends with a digit
+                if (digitIndex == -1 || int.TryParse(Value.Substring(digitIndex + 1), out int digitValue) == false)
+                {
+                    GameTags.Add(Value);
+                }
             }
         }
 

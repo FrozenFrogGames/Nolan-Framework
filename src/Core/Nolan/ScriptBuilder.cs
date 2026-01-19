@@ -506,7 +506,14 @@ namespace FrozenFrogFramework.NolanTech
             {
                 if (rule.Accept(scene, stat, out var meta))
                 {
-                    result.Add(rule.Description(), meta);
+                    string name = rule.Description();
+
+                    if (result.ContainsKey(name))
+                    {
+                        name = $"{name} duplicate";
+                    }
+
+                    result.Add(name, meta);
                 }
             }
 

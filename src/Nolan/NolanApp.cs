@@ -8,12 +8,15 @@ namespace FrozenFrogFramework.NolanApp
         public void parse(string filename)
         {
             string currentDirectory = Directory.GetCurrentDirectory();
-            string contentFullpath = Path.Combine(currentDirectory, filename);
+            string contentFilename, contentFullpath = Path.Combine(currentDirectory, filename);
 
-            string contentFilename = File.Exists(contentFullpath) ? filename : Path.Combine("content", filename);
-
-            if (File.Exists(contentFullpath) == false)
+            if (File.Exists(contentFullpath))
             {
+                contentFilename = filename;
+            }
+            else // default behavior use 'content' as subdirectory for files
+            {
+                contentFilename = Path.Combine("content", filename);
                 contentFullpath = Path.Combine(currentDirectory, contentFilename);
             }
 
@@ -37,8 +40,7 @@ namespace FrozenFrogFramework.NolanApp
                         Console.WriteLine($"File: {contentOutput}");
                     }
 
-
-                    writeGameplayTags( contentFilename, F3NolanGameTag.GameTags);
+                    writeGameplayTags(contentFilename, F3NolanGameTag.GameTags);
                 }
             }
             else
@@ -54,9 +56,13 @@ namespace FrozenFrogFramework.NolanApp
 
             gameTags.Sort(StringComparer.OrdinalIgnoreCase);
 
-            using (StreamWriter headerWriter = new StreamWriter(Path.Combine(directory, filename + "_GameTags.h")))
+            string headerFilename = Path.Combine(directory, filename + "_GameTags.h");
+
+            using (StreamWriter headerWriter = new StreamWriter(headerFilename))
             {
-                using (StreamWriter bodyWriter = new StreamWriter(Path.Combine(directory, filename + "_GameTags.cpp")))
+                string bodyFilename = Path.Combine(directory, filename + "_GameTags.cpp");
+
+                using (StreamWriter bodyWriter = new StreamWriter(bodyFilename))
                 {
                     headerWriter.WriteLine(@"#pragma once" + System.Environment.NewLine + System.Environment.NewLine + "#include \"NativeGameplayTags.h\"" + System.Environment.NewLine);
                     bodyWriter.WriteLine($"#include \"{filename}_GameTags.h\"" + System.Environment.NewLine);
@@ -68,7 +74,11 @@ namespace FrozenFrogFramework.NolanApp
                         headerWriter.WriteLine($"UE_DECLARE_GAMEPLAY_TAG_EXTERN({tagName})");
                         bodyWriter.WriteLine($"UE_DEFINE_GAMEPLAY_TAG({tagName}, \"{statTag}\")");
                     }
+
+                    Console.WriteLine($"File: {bodyFilename}");
                 }
+
+                Console.WriteLine($"File: {headerFilename}");
             }
         }
 
@@ -209,7 +219,7 @@ namespace FrozenFrogFramework.NolanApp
                                 }
                                 else
                                 {
-                                        lineIndex = int.Parse(text.Substring(lineEnds + 1));
+                                    lineIndex = int.Parse(text.Substring(lineEnds + 1));
                                 }
 
                                 int textCount = script.TextBook.Lines[text].Length;
