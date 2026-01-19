@@ -405,6 +405,22 @@ namespace FrozenFrogFramework.NolanTech
             return true;
         }
 
+        public string Description()
+        {
+            var matchString = Match.Value.Replace(".", " with ");
+
+            if (Cost.Any())
+            {
+                var costString = string.Join(" and ", Cost.Select(tag => tag.Value));
+
+                costString = costString.Replace(".", " with ");
+
+                return $"Drag the {costString} onto the {matchString}. ";
+            }
+
+            return $"Poke the {matchString}. ";
+        }
+
         /// <summary>
         /// Retourne une représentation textuelle de la règle Nolan.
         /// </summary>

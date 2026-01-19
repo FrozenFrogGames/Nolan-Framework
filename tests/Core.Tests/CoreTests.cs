@@ -18,7 +18,7 @@ public class CoreTests
 
         .Text("HELLO", "Hello World")
         .Text("QUEST", "I Love King Quest")
-        .Text("TALK", "Accepterez-vous ma quête preu chevalier?", "Sauverez-vous le royaume mon ami?")
+        .Text("TALK", "Accepterez-vous ma quête preux chevalier?", "Sauverez-vous le royaume mon ami?")
         .Text("THANK", "Merci mon valeureux", "et bonne chance!")
         .Text("TALK-1S", "Oui.")
         .Text("TALK-1", "Oui votre majesté.")
@@ -57,7 +57,7 @@ public class CoreTests
                 "++ (dragon<CAVE>)-{hero}[?door<CAVE>]->(dragon.fire<CAVE>;hero.fire<CAVE>)",
                 "++ ()-[?castle<HOME>]->()",
                 "++ (!sword;!hero.sword)-[?king]->() #TALK",
-                "(?<Accepterez-vous ma quête preu chevalier?><Sauverez-vous le royaume mon ami?>)",
+                "(?<Accepterez-vous ma quête preux chevalier?><Sauverez-vous le royaume mon ami?>)",
                 "-- Oui[.] votre majesté.",
                 "--> (sword) THANK",
                 "-- [Peut-être?] Ça dépend, c'est quoi?",

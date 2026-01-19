@@ -94,7 +94,7 @@ namespace FrozenFrogFramework.NolanApp
 
                     foreach (var option in options)
                     {
-                        Console.WriteLine($"[{index++}] {option.Key.Substring(3)}");
+                        Console.WriteLine($"[{index++}] {option.Key}");
                     }
 
                     Console.Write("Choose an option: ");
@@ -124,7 +124,7 @@ namespace FrozenFrogFramework.NolanApp
 
                                         string result = script.TextBook[textKey];
 
-                                        if (result.Equals("<$EOF/>")) // TODO handle signal better
+                                        if (result.Equals("<$GAMEOVER/>")) // TODO handle signal better
                                         {
                                             return;
                                         }
@@ -227,7 +227,7 @@ namespace FrozenFrogFramework.NolanApp
                                             {
                                                 string result = script.TextBook[$"{textKey}_{i}"];
 
-                                                if (result.Equals("<$EOF/>")) // TODO handle signal better
+                                                if (result.Equals("<$GAMEOVER/>")) // TODO handle signal better
                                                 {
                                                     return;
                                                 }
@@ -243,7 +243,7 @@ namespace FrozenFrogFramework.NolanApp
                                 {
                                     string result = script.TextBook[text];
 
-                                    if (result.Equals("<$EOF/>")) // TODO handle signal better
+                                    if (result.Equals("<$GAMEOVER/>")) // TODO handle signal better
                                     {
                                         return;
                                     }

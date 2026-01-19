@@ -504,16 +504,9 @@ namespace FrozenFrogFramework.NolanTech
 
             foreach (var rule in rulebook)
             {
-                string ruleName = rule.ToString();
-
-                if (result.ContainsKey(ruleName))
-                {
-                    throw NolanException.ContextError($"Rulebook contains '{ruleName}' already.", ENolanScriptContext.Rule, ENolanScriptError.DuplicateKey);
-                }
-
                 if (rule.Accept(scene, stat, out var meta))
                 {
-                    result.Add(ruleName, meta);
+                    result.Add(rule.Description(), meta);
                 }
             }
 
