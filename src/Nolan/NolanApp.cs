@@ -7,18 +7,8 @@ namespace FrozenFrogFramework.NolanApp
     {
         public void parse(string filename)
         {
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string contentFilename, contentFullpath = Path.Combine(currentDirectory, filename);
-
-            if (File.Exists(contentFullpath))
-            {
-                contentFilename = filename;
-            }
-            else // default behavior use 'content' as subdirectory for files
-            {
-                contentFilename = Path.Combine("content", filename);
-                contentFullpath = Path.Combine(currentDirectory, contentFilename);
-            }
+            string contentDirectory = NolanApp.GetContentDirectory(filename);
+            string contentFullpath = Path.Combine(contentDirectory, filename);
 
             if (File.Exists(contentFullpath))
             {
@@ -32,35 +22,34 @@ namespace FrozenFrogFramework.NolanApp
 
                     foreach (var key in builder.Keys)
                     {
-                        string outputFilename = Path.ChangeExtension(contentFilename, $"{key}.json");
-                        string contentOutput = Path.Combine(currentDirectory, outputFilename);
+                        string contentFilename = Path.ChangeExtension(filename, $"{key}.json");
+                        string contentOutput = Path.Combine(contentDirectory, contentFilename);
 
                         File.WriteAllText(contentOutput, NolanJsonSerializer.SerializeNolanScript(builder[key]));
 
                         Console.WriteLine($"File: {contentOutput}");
                     }
 
-                    writeGameplayTags(contentFilename, F3NolanGameTag.GameTags);
+                    writeGameplayTags(contentDirectory, contentFullpath, F3NolanGameTag.GameTags);
                 }
             }
             else
             {
-                Console.WriteLine($"Error (file not found): {contentFilename}");
+                Console.WriteLine($"Error (file not found): {contentFullpath}");
             }
         }
 
-        private void writeGameplayTags(string contentFilename, List<string> gameTags)
+        private void writeGameplayTags(string contentDirectory, string contentFilename, List<string> gameTags)
         {
             string filename = Path.GetFileNameWithoutExtension(contentFilename);
-            string directory = Path.GetDirectoryName( Path.Combine(Directory.GetCurrentDirectory(), contentFilename) ) ?? Directory.GetCurrentDirectory();
 
             gameTags.Sort(StringComparer.OrdinalIgnoreCase);
 
-            string headerFilename = Path.Combine(directory, filename + "_GameTags.h");
+            string headerFilename = Path.Combine(contentDirectory, filename + "_GameTags.h");
 
             using (StreamWriter headerWriter = new StreamWriter(headerFilename))
             {
-                string bodyFilename = Path.Combine(directory, filename + "_GameTags.cpp");
+                string bodyFilename = Path.Combine(contentDirectory, filename + "_GameTags.cpp");
 
                 using (StreamWriter bodyWriter = new StreamWriter(bodyFilename))
                 {
@@ -273,6 +262,33 @@ namespace FrozenFrogFramework.NolanApp
             }
         }
 
+        static private bool load(string filename, out F3NolanScriptData script)
+        {
+            string directory = NolanApp.GetContentDirectory(filename);
+            string file = Path.Combine(directory, filename);
+
+            if (File.Exists(file))
+            {
+                try
+                {
+                    script = NolanJsonSerializer.DeserializeNolanScript(string.Join('\n', File.ReadAllLines(file)));
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    System.Console.WriteLine($"Error ({ex.Message}): '{file}'");
+                }
+            }
+            else
+            {
+                System.Console.WriteLine($"Error (file not found): '{file}'");
+            }
+
+            script = F3NolanScriptData.Empty;
+            return false;
+        }
+
         static private bool ValidateContext(string scene, F3NolanGameTagSet tags, in F3NolanStatData stat, ref List<F3NolanRuleMeta> meta)
         {
             foreach (var tag in tags)
@@ -352,35 +368,34 @@ namespace FrozenFrogFramework.NolanApp
             return true;
         }
 
-        static private bool load(string filename, out F3NolanScriptData script)
+        static private string GetContentDirectory(string filename)
         {
-            string file = Path.Combine(Directory.GetCurrentDirectory(), filename);
+            string directory = Directory.GetCurrentDirectory();                
+            string file = Path.Combine(directory, filename);
 
-            if (File.Exists(file) == false)
+            while (File.Exists(file) == false)
             {
-                file = Path.Combine(Directory.GetCurrentDirectory(), Path.Combine("content", filename));
-            }
+                file = Path.Combine(directory, Path.Combine("content", filename));
 
-            if (File.Exists(file))
-            {
-                try
+                if (File.Exists(file))
                 {
-                    script = NolanJsonSerializer.DeserializeNolanScript(string.Join('\n', File.ReadAllLines(file)));
-
-                    return true;
+                    return Path.Combine(directory, "content");
                 }
-                catch (Exception ex)
+                else
                 {
-                    System.Console.WriteLine($"Error ({ex.Message}): '{file}'");
+                    var parent = Directory.GetParent(directory);
+
+                    if (parent is null)
+                    {
+                        // content directory not found into parent
+                        return string.Empty; 
+                    }
+
+                    directory = parent.FullName;
                 }
             }
-            else
-            {
-                System.Console.WriteLine($"Error (file not found): '{file}'");
-            }
 
-            script = F3NolanScriptData.Empty;
-            return false;
+            return directory;
         }
 
         static private AppRunner<NolanApp> Runner = new AppRunner<NolanApp>();

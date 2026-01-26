@@ -1,0 +1,244 @@
+{
+  "Stat": "== [CAVE, castle;dragon] [HOME, door;hero;king] [LOOP, TALK_0] [ONCE, TALK-2-0_0]",
+  "Rule": [
+    {
+      "Match": "?hero",
+      "Text": "HELLO"
+    },
+    {
+      "Match": "?door<CAVE>"
+    },
+    {
+      "Match": "?door<CAVE>",
+      "Context": [
+        "dragon<CAVE>"
+      ],
+      "Cost": [
+        "hero"
+      ],
+      "IsDrag": false,
+      "Payload": [
+        "dragon.fire<CAVE>",
+        "hero.kill<CAVE>"
+      ],
+      "Text": "GAMEOVER"
+    },
+    {
+      "Match": "?king",
+      "Context": [
+        "?hero"
+      ],
+      "Text": "TALK"
+    },
+    {
+      "Match": "?castle<HOME>",
+      "Context": [
+        "?king"
+      ],
+      "Cost": [
+        "hero.sword"
+      ],
+      "IsDrag": false,
+      "Payload": [
+        "hero.sword<HOME>"
+      ]
+    },
+    {
+      "Match": "?hero.sword",
+      "Text": "QUEST"
+    },
+    {
+      "Match": "?castle<HOME>"
+    },
+    {
+      "Match": "?door<CAVE>",
+      "Context": [
+        "dragon<CAVE>"
+      ],
+      "Cost": [
+        "hero.sword"
+      ],
+      "IsDrag": false,
+      "Payload": [
+        "dragon.kill<CAVE>",
+        "hero.sword<CAVE>"
+      ],
+      "Text": "HAPPYENDING"
+    },
+    {
+      "Match": "?king",
+      "Context": [
+        "?hero.sword"
+      ],
+      "Text": "THANK"
+    },
+    {
+      "Match": "king",
+      "Cost": [
+        "hero.sword"
+      ],
+      "IsDrag": false,
+      "Payload": [
+        "hero.sword",
+        "king.kill"
+      ],
+      "Text": "BADENDING"
+    }
+  ],
+  "Text": {
+    "HELLO": [
+      "Hello World"
+    ],
+    "GAMEOVER": [
+      "<$GAMEOVER/>"
+    ],
+    "TALK": [
+      "Accepterez-vous ma quête preux chevalier?",
+      "Sauverez-vous le royaume mon ami?"
+    ],
+    "TALK-1S": [
+      "Oui."
+    ],
+    "TALK-1": [
+      "Oui votre majesté."
+    ],
+    "TALK-2S": [
+      "Peut-être?"
+    ],
+    "TALK-2": [
+      "Ça dépend, c'est quoi?"
+    ],
+    "TALK-2-0": [
+      "Libérez le royaume du dragon.",
+      "Tuez la bête."
+    ],
+    "TALK-2-1S": [
+      "Oui."
+    ],
+    "TALK-2-1": [
+      "Oui mais j'ai besoin d'une arme."
+    ],
+    "TALK-2-1-0": [
+      "Prenez l'épée royale mon brave."
+    ],
+    "TALK-2-2S": [
+      "Non!"
+    ],
+    "TALK-2-2": [
+      "Non, je suis contre la cruauté animale."
+    ],
+    "TALK-3S": [
+      "Non!"
+    ],
+    "TALK-3": [
+      "Non, merci."
+    ],
+    "QUEST": [
+      "I Love King Quest"
+    ],
+    "HAPPYENDING": [
+      "Tous les gens du royame vécurent heureux et eurent beaucoup d'enfants.",
+      "<$GAMEOVER/>"
+    ],
+    "THANK": [
+      "Merci mon valeureux",
+      "et bonne chance!"
+    ],
+    "BADENDING": [
+      "Une ère de tyrannie s'abbattu sur le royaume pour plusieurs générations.",
+      "<$GAMEOVER/>"
+    ]
+  },
+  "Route": {
+    "TALK": {
+      "Text": [
+        "TALK"
+      ],
+      "Flow": [
+        {
+          "Choice": "TALK-1S",
+          "Next": "TALK-1",
+          "Context": [
+            "hero"
+          ],
+          "Payload": [
+            "hero.sword"
+          ]
+        },
+        {
+          "Choice": "TALK-2S",
+          "Next": "TALK-2"
+        },
+        {
+          "Choice": "TALK-3S",
+          "Next": "TALK-3"
+        }
+      ]
+    },
+    "TALK-2": {
+      "Text": [
+        "TALK-2-0",
+        "TALK-2"
+      ],
+      "Flow": [
+        {
+          "Choice": "TALK-2-1S",
+          "Next": "TALK-2-1",
+          "Context": [
+            "hero"
+          ],
+          "Payload": [
+            "hero.sword"
+          ]
+        },
+        {
+          "Choice": "TALK-2-2S",
+          "Next": "TALK-2-2"
+        }
+      ]
+    },
+    "TALK-2-1": {
+      "Text": [
+        "TALK-2-1-0",
+        "TALK-2-1"
+      ],
+      "Goto": "THANK"
+    },
+    "TALK-1": {
+      "Text": [
+        "TALK-1"
+      ],
+      "Goto": "THANK"
+    },
+    "TALK-3": {
+      "Text": [
+        "TALK-3"
+      ]
+    },
+    "TALK-2-2": {
+      "Text": [
+        "TALK-2-2"
+      ]
+    }
+  },
+  "Range": {
+    "HAPPYENDING": [
+      {
+        "Start": 0,
+        "End": 2
+      }
+    ],
+    "THANK": [
+      {
+        "Start": 0,
+        "End": 2
+      }
+    ],
+    "BADENDING": [
+      {
+        "Start": 0,
+        "End": 2
+      }
+    ]
+  }
+}
