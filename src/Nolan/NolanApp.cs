@@ -1,11 +1,110 @@
 using FrozenFrogFramework.NolanTech;
-using CommandDotNet;
 
 namespace FrozenFrogFramework.NolanApp
 {
-    public class NolanApp
+    static public class NolanApp
     {
-        public void parse(string filename)
+        static int Main(string[] args)
+        {
+            if (args.Count() == 0)
+            {
+                PrintHelp(true, true);
+            }
+            else
+            {
+                switch(args[0].ToUpper())
+                {
+                    case "PARSE":
+                        if (args.Count() > 1)
+                        {
+                            parse(args[1]);
+                        }
+                        else
+                        {
+                            PrintHelp(true, false);
+
+                            string[] files = NolanApp.GetContentFiles("*.txt");
+
+                            if (files.Count() > 0)
+                            {
+                                System.Console.WriteLine("Option:");
+
+                                foreach (string file in files)
+                                {
+                                    System.Console.WriteLine($"  parse {Path.GetFileName(file)}");
+                                }                                
+
+                                System.Console.WriteLine();
+                            }
+                        }
+                        break;
+
+                    case "PLAY":
+                        if (args.Count() > 2)
+                        {
+                            play(args[1], args[2].ToUpper());
+                        }
+                        else if (args.Count() > 1)
+                        {
+                            play(args[1]);
+                        }
+                        else
+                        {
+                            PrintHelp(false, true);
+
+                            string[] files = NolanApp.GetContentFiles("*.json");
+
+                            if (files.Count() > 0)
+                            {
+                                System.Console.WriteLine("Option:");
+
+                                foreach (string file in files)
+                                {
+                                    System.Console.WriteLine($"  play {Path.GetFileName(file)}");
+                                }                                
+
+                                System.Console.WriteLine();
+                            }
+                        }
+                        break;
+
+                    default:
+                        PrintHelp(true, true);
+                        break;
+                }
+            }
+
+            return 1;
+        }
+
+        static private void PrintHelp(bool displayParse, bool displayPlay)
+        {
+            System.Console.WriteLine("Description:");
+            System.Console.WriteLine("  Narrative Oriented Language (NOLAN) Command Line Interpreter");
+            System.Console.WriteLine();
+
+            if (displayParse || displayPlay)
+            {
+                System.Console.WriteLine("Command:");
+            }
+
+            if (displayParse)
+            {
+                System.Console.WriteLine("  parse <filename>              Parse file into JSON format.");
+            }
+
+            if (displayPlay)
+            {
+                System.Console.WriteLine("  play <filename> [location]    Play script from the JSON file.");
+            }
+
+            if (displayParse || displayPlay)
+            {
+                System.Console.WriteLine();
+            }
+        }
+
+        static public void parse(string filename)
         {
             string contentDirectory = NolanApp.GetContentDirectory(filename);
             string contentFullpath = Path.Combine(contentDirectory, filename);
@@ -39,7 +138,7 @@ namespace FrozenFrogFramework.NolanApp
             }
         }
 
-        private void writeGameplayTags(string contentDirectory, string contentFilename, List<string> gameTags)
+        static private void writeGameplayTags(string contentDirectory, string contentFilename, List<string> gameTags)
         {
             string filename = Path.GetFileNameWithoutExtension(contentFilename);
 
@@ -71,7 +170,7 @@ namespace FrozenFrogFramework.NolanApp
             }
         }
 
-        public void play(string filename, string? location = null)
+        static public void play(string filename, string? location = null)
         {
             F3NolanScriptData script;
             int index, inputIndex;
@@ -368,6 +467,37 @@ namespace FrozenFrogFramework.NolanApp
             return true;
         }
 
+        static private string[] GetContentFiles(string extension)
+        {
+            string directory = Directory.GetCurrentDirectory();                
+            string[] files = Directory.GetFiles(directory, extension);
+            
+            while (files.Count() == 0)
+            {
+                string contentDir = Path.Combine(directory, "content");
+
+                if (Directory.Exists(contentDir))
+                {
+                    files = Directory.GetFiles(contentDir, extension);
+                }
+
+                if (files.Count() == 0)
+                {
+                    var parent = Directory.GetParent(directory);
+
+                    if (parent is null)
+                    {
+                        // content directory not found into parent
+                        return Array.Empty<string>(); 
+                    }
+
+                    directory = parent.FullName;
+                }
+            }
+
+            return files;
+        }
+
         static private string GetContentDirectory(string filename)
         {
             string directory = Directory.GetCurrentDirectory();                
@@ -396,13 +526,6 @@ namespace FrozenFrogFramework.NolanApp
             }
 
             return directory;
-        }
-
-        static private AppRunner<NolanApp> Runner = new AppRunner<NolanApp>();
-
-        static int Main(string[] args)
-        {
-            return Runner.Run(args);
         }
     }
 }
