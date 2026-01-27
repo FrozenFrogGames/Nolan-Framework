@@ -161,6 +161,13 @@ namespace FrozenFrogFramework.NolanTech
             }
         }
 
+        public bool ContainsLocation(string location)
+        {
+            var loc = Locations.FirstOrDefault(loc => loc.Key.Equals(location, StringComparison.OrdinalIgnoreCase));
+
+            return loc.Key != null;
+        }
+
         public bool ContainsTag(string tag, string location)
         {
             var loc = Locations.FirstOrDefault(loc => loc.Key.Equals(location, StringComparison.OrdinalIgnoreCase));

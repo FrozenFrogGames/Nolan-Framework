@@ -175,11 +175,20 @@ namespace FrozenFrogFramework.NolanApp
             F3NolanScriptData script;
             int index, inputIndex;
             string? input;
+            string scene;
 
             if (load(filename, out script))
             {
                 Console.Clear();
-                string scene = string.IsNullOrEmpty(location) ? script.InitialStat.FirstOrDefault().Key : location;
+
+                if (string.IsNullOrEmpty(location) == false && script.InitialStat.ContainsLocation(location))
+                {
+                    scene = location;
+                }
+                else
+                {
+                    scene = script.InitialStat.FirstOrDefault().Key; 
+                }
 
                 F3NolanStatData transient = script.InitialStat;
                 Console.WriteLine(transient.ToString());
