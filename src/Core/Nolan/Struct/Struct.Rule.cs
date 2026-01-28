@@ -138,6 +138,13 @@ namespace FrozenFrogFramework.NolanTech
             var ruleMatch = Match;
 
             var location = stat.Locations.FirstOrDefault(loc => loc.Key.Equals(scene, StringComparison.OrdinalIgnoreCase));
+
+            if (location.Value is null)
+            {
+                meta = new KeyValuePair<string, F3NolanRuleMeta[]>(string.Empty, new F3NolanRuleMeta[] { });
+                return false;
+            }
+
             var ruleTags = new HashSet<string>(location.Value.Select(t => t.Value));
 
             if (location.Value.Any(t => t.Value == ruleMatch.Value))
